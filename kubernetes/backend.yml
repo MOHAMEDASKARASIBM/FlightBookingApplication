@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: /***/
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "1"
+          env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  key: PORT
+                  name: application-config
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  key: NODE_ENV
+                  name: application-config
+            - name: MONGO_URL
+              valueFrom:
+                secretKeyRef:
+                  key: MONGO_URL
+                  name: application-secrets
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: JWT_SECRET
+                  name: application-secrets
+            - name: JWT_EXPIRES_IN
+              value: 1d
+            - name: EMAIL_SERVICE
+              value: gmail
+            - name: EMAIL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: EMAIL_USERNAME
+                  name: application-secrets
+            - name: EMAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: EMAIL_PASSWORD
+                  name: application-secrets
+            - name: FRONTEND_URL
+              value: avesair.gokulmylsami.me
+            - name: AWS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: AWS_ACCESS_KEY
+                  name: application-secrets
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: AWS_SECRET_ACCESS_KEY
+                  name: application-secrets
+            - name: AWS_REGION
+              valueFrom:
+                secretKeyRef:
+                  key: AWS_REGION
+                  name: application-secrets
+          ports:
+            - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: backend
+  type: ClusterIP
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
